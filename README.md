@@ -28,11 +28,17 @@ Both contracts demonstrate different approaches to NFT metadata handling and use
 ## ✨ Features
 
 ### BasicNft Contract
-- ✅ ERC721 compliant
+- ✅ ERC721 compliant with advanced features
+- ✅ **Batch Minting** - Mint multiple NFTs in single transaction (up to 50)
+- ✅ **EIP-2981 Royalty System** - Creator royalties with configurable fees
+- ✅ **Burn Functionality** - Token owners can burn their NFTs
+- ✅ **Pause/Unpause** - Emergency stop mechanism for security
+- ✅ **Whitelist System** - Pre-sale functionality with approved addresses
+- ✅ **Metadata Validation** - JSON metadata structure validation
 - ✅ Custom token URI mapping
-- ✅ Simple minting functionality
 - ✅ Input validation for empty URIs
 - ✅ Automatic token counter management
+- ✅ Owner access control for administrative functions
 
 ### MoodNft Contract
 - ✅ ERC721 compliant with Ownable access control
@@ -68,10 +74,20 @@ NFTs-NonFungibleTokens/
 ## 🔧 Smart Contracts
 
 ### BasicNft.sol
-A straightforward ERC721 implementation that allows users to mint NFTs with custom metadata URIs.
+An advanced ERC721 implementation with enterprise-level features including batch minting, royalty management, whitelist functionality, and comprehensive metadata validation.
 
 **Key Functions:**
 - `mintNft(string memory tokenUri)` - Mint a new NFT with custom URI
+- `batchMintNft(string[] memory tokenUris)` - Mint multiple NFTs in single transaction
+- `whitelistMintNft(string memory tokenUri)` - Mint for whitelisted users only
+- `whitelistBatchMintNft(string[] memory tokenUris)` - Batch mint for whitelisted users
+- `burn(uint256 tokenId)` - Burn an NFT (owner or approved only)
+- `addToWhitelist(address account)` - Add address to whitelist (owner only)
+- `removeFromWhitelist(address account)` - Remove address from whitelist (owner only)
+- `pause()` / `unpause()` - Emergency stop/resume functionality (owner only)
+- `setDefaultRoyalty(address receiver, uint96 feeNumerator)` - Set default royalty (owner only)
+- `setTokenRoyalty(uint256 tokenId, address receiver, uint96 feeNumerator)` - Set token-specific royalty (owner only)
+- `validateMetadata(string memory tokenUri)` - Validate JSON metadata structure
 - `tokenURI(uint256 tokenId)` - Retrieve metadata URI for a token
 
 ### MoodNft.sol
@@ -146,6 +162,28 @@ forge test --gas-report
 ```solidity
 // Mint an NFT with custom metadata
 basicNft.mintNft("ipfs://your-metadata-uri");
+
+// Batch mint multiple NFTs
+string[] memory tokenUris = new string[](3);
+tokenUris[0] = "ipfs://metadata1";
+tokenUris[1] = "ipfs://metadata2";
+tokenUris[2] = "ipfs://metadata3";
+basicNft.batchMintNft(tokenUris);
+
+// Whitelist minting (owner must add to whitelist first)
+basicNft.addToWhitelist(userAddress);
+basicNft.toggleWhitelist(); // Enable whitelist mode
+basicNft.whitelistMintNft("ipfs://whitelist-metadata");
+
+// Burn an NFT (owner or approved only)
+basicNft.burn(tokenId);
+
+// Set royalty (owner only)
+basicNft.setDefaultRoyalty(royaltyReceiver, 250); // 2.5%
+
+// Emergency pause (owner only)
+basicNft.pause();
+basicNft.unpause();
 ```
 
 **MoodNft Interaction:**
@@ -161,12 +199,17 @@ moodNft.flipMood(tokenId);
 
 The project includes comprehensive test suites covering:
 
-- **BasicNft Tests:**
-  - Name and symbol verification
-  - Minting functionality
-  - Token URI handling
-  - Input validation
-  - Multiple NFT minting
+- **BasicNft Tests (53 tests):**
+  - **Basic Functionality** - Name, symbol, minting, token URIs
+  - **Batch Minting** - Batch operations, events, error cases, size limits
+  - **Burn Functionality** - Burning, authorization, cleanup
+  - **Whitelist System** - Management, minting, access control, batch operations
+  - **Pause/Unpause** - Emergency stops, access control
+  - **Royalty System** - Default and token-specific royalties, EIP-2981 compliance
+  - **Metadata Validation** - JSON validation, error handling, mixed metadata
+  - **View Functions** - Counter, URIs, state queries
+  - **Access Control** - Owner-only functions, authorization
+  - **Edge Cases** - Complex scenarios, interactions, error conditions
 
 - **MoodNft Tests:**
   - Payment validation
@@ -199,6 +242,27 @@ forge script script/DeployMoodNft.s.sol --rpc-url http://localhost:8545 --privat
 forge script script/DeployMoodNft.s.sol --rpc-url $SEPOLIA_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify
 ```
 
+## 🚀 **New BasicNft Features (Latest Update)**
+
+### **Enterprise-Grade Functionality**
+- **Batch Minting**: Mint up to 50 NFTs in a single transaction for gas efficiency
+- **EIP-2981 Royalties**: Standard-compliant royalty system with configurable fees
+- **Burn Mechanism**: Token owners can permanently burn their NFTs
+- **Emergency Controls**: Pause/unpause functionality for security incidents
+- **Whitelist System**: Pre-sale functionality with approved address management
+- **Metadata Validation**: Automatic JSON metadata structure validation
+
+### **Advanced Access Control**
+- **Owner-Only Functions**: Administrative functions restricted to contract owner
+- **Role-Based Permissions**: Different access levels for different operations
+- **Batch Operations**: Efficient management of multiple addresses/operations
+
+### **Production-Ready Features**
+- **Gas Optimization**: Efficient batch operations and storage patterns
+- **Comprehensive Testing**: 53 tests covering all functionality and edge cases
+- **Event Emission**: Detailed events for all major operations
+- **Error Handling**: Custom errors for better debugging and gas efficiency
+
 ## 🎨 On-Chain Metadata
 
 The MoodNft contract demonstrates **100% on-chain metadata** storage:
@@ -221,8 +285,14 @@ Example metadata structure:
 
 - **Access Control**: Owner-only functions for critical operations
 - **Input Validation**: Prevents empty token URIs and invalid payments
-- **Error Handling**: Custom errors for better gas efficiency
+- **Metadata Validation**: JSON structure validation for metadata integrity
+- **Emergency Controls**: Pause/unpause mechanism for security incidents
+- **Whitelist Protection**: Controlled access for pre-sale functionality
+- **Burn Authorization**: Only token owners or approved addresses can burn
+- **Error Handling**: Custom errors for better gas efficiency and debugging
 - **Safe Transfers**: Uses OpenZeppelin's `_safeMint` for secure transfers
+- **Batch Size Limits**: Prevents gas limit issues with reasonable batch sizes
+- **Royalty Protection**: EIP-2981 compliant royalty system
 
 ## 🤝 Contributing
 
